@@ -27,7 +27,17 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(argparse)
 
 # Add source files for compilation.
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp people.cpp)
 add_executable(main ${SOURCE_FILES})
-target_link_libraries(main PRIVATE fmt::fmt argparse)
+
+target_include_directories(main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(main PRIVATE fmt argparse)
 target_compile_features(main PRIVATE cxx_std_20)
+
+# For Macos, speeding up first run
+if(APPLE)
+    add_custom_command(TARGET main POST_BUILD
+        COMMAND codesign --force --sign - $<TARGET_FILE:main>
+        COMMENT "MACOS: Applying ad-hoc code signature to bypass Gatekeeper scan"
+    )
+endif()
