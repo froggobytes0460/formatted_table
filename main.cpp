@@ -1,18 +1,13 @@
 #include <iostream>
-#include <fmt/core.h>
+#include <filesystem>
 #include <argparse/argparse.hpp>
 #include "people.hpp"
 
 
-// Test value before adding CSV support.
-const std::vector<people::Person> peopleList {{
-    people::Person("Alice", 30, people::Person::GenderEnum::F),
-    people::Person("Bob", 25, people::Person::GenderEnum::M),
-    people::Person("Charlie", 35, people::Person::GenderEnum::M),
-}};
-
-
 int main(int argc, char** argv) {
+    // Filepath to the CSV file containing the data to be displayed in the table.
+    std::string csvFilePath;
+
     /* Table style variables initialization, default values set */
 
     int nameWidth = 10;
@@ -22,20 +17,36 @@ int main(int argc, char** argv) {
     /* Use the ArgumentParser to parse command line arguments */
 
     argparse::ArgumentParser program("formatted-table", "0.1.0");
+    program.add_description(
+        "Displays a formatted terminal table from a CSV source file.\n"
+        "Input requirements: Exactly 3 columns ordered as Name, Age, and Gender."
+    );
+
+    program.add_epilog(
+        "Examples:\n"
+        "  formatted-table data.csv\n"
+        "  formatted-table data.csv -n 20 -a 8 -g 8\n"
+        "  formatted-table data.csv --name-width 20 --age-width 8 --gender-width 8"
+    );
+
+    program.add_argument("csv-file")
+        .help("Path to the input CSV data file.")
+        .store_into(csvFilePath);
+    
     program.add_argument("-n", "--name-width")
-        .help("Width of name column in table.")
+        .help("Custom layout width for the 'Name' column.")
         .scan<'i', int>()
         .default_value(nameWidth)
         .store_into(nameWidth);
 
     program.add_argument("-a", "--age-width")
-        .help("Width of age column in table.")
+        .help("Custom layout width for the 'Age' column.")
         .scan<'i', int>()
         .default_value(ageWidth)
         .store_into(ageWidth);
 
     program.add_argument("-g", "--gender-width")
-        .help("Width of gender column in table.")
+        .help("Custom layout width for the 'Gender' column.")
         .scan<'i', int>()
         .default_value(genderWidth)
         .store_into(genderWidth);
@@ -43,11 +54,23 @@ int main(int argc, char** argv) {
     try
     {
         program.parse_args(argc, argv);
+        if (std::filesystem::path(csvFilePath).extension() != ".csv") {
+            throw std::runtime_error("Input file must have a '.csv' extension.");
+        }
+        if (ageWidth <= 0 || nameWidth <= 0 || genderWidth <= 0) {
+            throw std::runtime_error("Column widths must be positive integers.");
+        }
     }
     catch(const std::runtime_error& e)
     {
-        fmt::print(stderr, "{}\n{}", e.what(), program.help().str());
+        fmt::print(stderr, "Error: {}\n{}", e.what(), program.help().str());
         return 1;
+    }
+
+    // Populate peopleList from CSV file
+    std::vector<people::Person> peopleList;
+    if (int statusCode = people::populatePeopleListFromCSV(csvFilePath, peopleList); statusCode != 0) {
+        return statusCode;
     }
 
     /* Print table */
