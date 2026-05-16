@@ -13,6 +13,7 @@ FetchContent_Declare(
   fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
   GIT_TAG 11.0.2
+  SYSTEM
 )
 
 # Fetch the argparse library from GitHub.
@@ -20,6 +21,7 @@ FetchContent_Declare(
   argparse
   GIT_REPOSITORY https://github.com/p-ranav/argparse.git
   GIT_TAG v3.2
+  SYSTEM
 )
 
 # Fetch testing framework
@@ -27,6 +29,7 @@ FetchContent_Declare(
     catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
     GIT_TAG v3.5.0
+    SYSTEM
 )
 
 # Make the libraries available for linking.
@@ -55,7 +58,13 @@ add_executable(tests test/test_people.cpp)
 target_link_libraries(tests PRIVATE formatted-table-lib Catch2::Catch2WithMain)
 add_test(NAME all_tests COMMAND tests)
 
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=bugprone-*,modernize-*,performance-*")
+set(CMAKE_CXX_CLANG_TIDY
+    "clang-tidy;"
+    "-checks=bugprone-*,modernize-*,performance-*"
+    "-header-filter=${CMAKE_CURRENT_SOURCE_DIR}/include/;"
+    "-system-headers=false;"
+    "--quiet"
+)
 
 # MacOS optimization.
 if(APPLE)
