@@ -38,9 +38,9 @@ target_include_directories(formatted-table-lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR
 target_link_libraries(formatted-table-lib PUBLIC fmt::fmt argparse)
 target_compile_features(formatted-table-lib PUBLIC cxx_std_20)
 
-set(SOURCE_FILES 
-    main.cpp 
-    people.cpp 
+set(SOURCE_FILES
+    main.cpp
+    people.cpp
     include/people.hpp
 )
 

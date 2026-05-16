@@ -4,10 +4,11 @@ using namespace people;
 
 /* Initializers */
 
-Person::Person(const std::string& t_name, int t_age, Person::GenderEnum t_gender)
+Person::Person(const std::string& t_name, int t_age,
+               Person::GenderEnum t_gender)
     : name(t_name), age(t_age), gender(t_gender) {}
 
-Person::Person(const std::vector<std::string_view>& row) 
+Person::Person(const std::vector<std::string_view>& row)
     : name(""), age(0), gender(GenderEnum::F) {
   if (row.size() != 3) {
     throw std::invalid_argument(
