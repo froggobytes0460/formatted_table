@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(formatted_table LANGUAGES CXX)
 
+enable_testing() # At the very top to make CMake registers add_test() macros properly
+
 include(FetchContent)
 
 # Create the .gitignore instantly inside the build folder
@@ -53,14 +55,13 @@ add_executable(formatted-table ${SOURCE_FILES})
 target_link_libraries(formatted-table PRIVATE formatted-table-lib)
 
 # Testing setup
-enable_testing()
 add_executable(tests test/test_people.cpp)
 target_link_libraries(tests PRIVATE formatted-table-lib Catch2::Catch2WithMain)
 add_test(NAME all_tests COMMAND tests)
 
 set(CMAKE_CXX_CLANG_TIDY
     "clang-tidy;"
-    "-checks=bugprone-*,modernize-*,performance-*"
+    "-checks=bugprone-*,modernize-*,performance-*;"
     "-header-filter=${CMAKE_CURRENT_SOURCE_DIR}/include/;"
     "-system-headers=false;"
     "--quiet"
