@@ -15,8 +15,6 @@ FetchContent_Declare(
   GIT_TAG 11.0.2
 )
 
-FetchContent_MakeAvailable(fmt)
-
 # Fetch the argparse library from GitHub.
 FetchContent_Declare(
   argparse
@@ -24,17 +22,42 @@ FetchContent_Declare(
   GIT_TAG v3.2
 )
 
-FetchContent_MakeAvailable(argparse)
+# Fetch testing framework
+FetchContent_Declare(
+    catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.5.0
+)
+
+# Make the libraries available for linking.
+FetchContent_MakeAvailable(fmt argparse catch2)
+
+# Create a library with the core functionality
+add_library(formatted-table-lib people.cpp)
+target_include_directories(formatted-table-lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(formatted-table-lib PUBLIC fmt::fmt argparse)
+target_compile_features(formatted-table-lib PUBLIC cxx_std_20)
+
+set(SOURCE_FILES 
+    main.cpp 
+    people.cpp 
+    include/people.hpp
+)
+
 
 # Add source files for compilation.
-set(SOURCE_FILES main.cpp people.cpp)
 add_executable(formatted-table ${SOURCE_FILES})
+target_link_libraries(formatted-table PRIVATE formatted-table-lib)
 
-target_include_directories(formatted-table PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(formatted-table PRIVATE fmt argparse)
-target_compile_features(formatted-table PRIVATE cxx_std_20)
+# Testing setup
+enable_testing()
+add_executable(tests test/test_people.cpp)
+target_link_libraries(tests PRIVATE formatted-table-lib Catch2::Catch2WithMain)
+add_test(NAME all_tests COMMAND tests)
 
-# For Macos, speeding up first run
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=bugprone-*,modernize-*,performance-*")
+
+# MacOS optimization.
 if(APPLE)
     add_custom_command(TARGET formatted-table POST_BUILD
         COMMAND codesign --force --sign - $<TARGET_FILE:formatted-table>
