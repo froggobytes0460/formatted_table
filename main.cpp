@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
   /* Use the ArgumentParser to parse command line arguments */
 
-  argparse::ArgumentParser program("formatted-table", "0.1.0");
+  argparse::ArgumentParser program("formatted-table", "0.1.1");
   program.add_description(
       "Displays a formatted terminal table from a CSV source file.\n"
       "Input requirements: Exactly 3 columns ordered as Name, Age, and "
