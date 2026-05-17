@@ -8,11 +8,11 @@ int main(int argc, char** argv) {
   // Filepath to the CSV file containing the data to be displayed in the table.
   std::string csvFilePath;
 
-  /* Table style variables initialization, default values set */
+  /* Table style variables initialization */
 
-  int nameWidth = 25;
-  int ageWidth = 5;
-  int genderWidth = 6;
+  int nameWidth = 0;
+  int ageWidth = 0;
+  int genderWidth = 0;
 
   /* Use the ArgumentParser to parse command line arguments */
 
@@ -36,19 +36,19 @@ int main(int argc, char** argv) {
   program.add_argument("-n", "--name-width")
       .help("Custom layout width for the 'Name' column.")
       .scan<'i', int>()
-      .default_value(nameWidth)
+      .default_value(25)
       .store_into(nameWidth);
 
   program.add_argument("-a", "--age-width")
       .help("Custom layout width for the 'Age' column.")
       .scan<'i', int>()
-      .default_value(ageWidth)
+      .default_value(5)
       .store_into(ageWidth);
 
   program.add_argument("-g", "--gender-width")
       .help("Custom layout width for the 'Gender' column.")
       .scan<'i', int>()
-      .default_value(genderWidth)
+      .default_value(6)
       .store_into(genderWidth);
 
   try {
@@ -66,8 +66,9 @@ int main(int argc, char** argv) {
 
   // Populate peopleList from CSV file
   std::vector<people::Person> peopleList;
-  if (int statusCode =
-          people::populatePeopleListFromCSV(csvFilePath, peopleList);
+
+  int statusCode = 1;
+  if (statusCode = people::populatePeopleListFromCSV(csvFilePath, peopleList);
       statusCode != 0) {
     return statusCode;
   }
